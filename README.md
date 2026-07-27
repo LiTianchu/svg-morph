@@ -1,4 +1,13 @@
 # A Simple SVG Morphing Tool
+## Building
+```
+npm run build
+```
+
+## Running
+```
+npm start
+```
 
 Libraries: React, D3, Flubber, FFmpeg, JSZip  
 Demo SVGs from: <https://www.svgrepo.com/>
@@ -12,14 +21,3 @@ Able to morph the path shape, color, and stroke lines of uploaded SVGs
 ![Demo1](./public/morphing_sun_nearest-ezgif.com-speed.gif)  
 ![Demo2](./public/morphing_videp_4k_60frame-ezgif.com-speed.gif)
 
-## Building
-
-```
-npm run build
-```
-
-## Running
-
-```
-npm start
-```
