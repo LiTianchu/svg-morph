@@ -1,0 +1,19 @@
+FFmpeg WebAssembly Core Notice
+
+This application includes @ffmpeg/core version 0.12.10:
+  ffmpeg-core.js
+  ffmpeg-core.wasm
+It is distributed under the GNU General Public License,
+version 2 or, at your option, any later version (GPL-2.0-or-later).
+
+Project:
+https://github.com/ffmpegwasm/ffmpeg.wasm
+
+License:
+./GPL-2.0.txt
+
+Modifications:
+None. The files are unmodified copies from @ffmpeg/core 0.12.10.
+
+This application’s original source code is separately licensed under
+the MIT License. See the repository’s top-level LICENSE file.
