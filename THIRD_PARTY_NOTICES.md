@@ -1,8 +1,5 @@
 # Third-Party Notices
 
-SVG Morph includes third-party software whose licenses apply independently
-from the MIT License covering this project's original source code.
-
 ## FFmpeg WebAssembly core
 
 This project distributes the following unmodified files from
