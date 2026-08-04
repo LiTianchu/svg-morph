@@ -5,8 +5,8 @@ Features:
 - Supports any number of SVG images  
 - Transition both shape and color  
 - Handling holes in SVG images  
-- Exports to MP4 in up to 4K resolutions  
-- Custom animation easing  
+- Exports to MP4 in up to 4K resolution  
+- Custom animation easing effects  
 
 ## Building
 ```
