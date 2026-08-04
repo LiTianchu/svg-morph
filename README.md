@@ -1,5 +1,11 @@
 # A Simple SVG Morphing Tool
-Able to morph the path shape, color, and stroke lines of uploaded SVGs. Supports hole handling in SVG images.  
+Able to morph the path shape, color, and stroke lines of uploaded SVGs.  
+
+Features:  
+- Supports any number of SVG image
+- Handling holes in SVG images
+- Exports to MP4 in up to 4K resolutions
+- Custom animation easing 
 
 ## Building
 ```
