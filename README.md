@@ -2,10 +2,11 @@
 Able to morph the path shape, color, and stroke lines of uploaded SVGs.  
 
 Features:  
-- Supports any number of SVG image
-- Handling holes in SVG images
-- Exports to MP4 in up to 4K resolutions
-- Custom animation easing 
+- Supports any number of SVG images  
+- Transition both shape and color  
+- Handling holes in SVG images  
+- Exports to MP4 in up to 4K resolutions  
+- Custom animation easing  
 
 ## Building
 ```
