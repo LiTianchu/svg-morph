@@ -1,6 +1,7 @@
 # A Simple SVG Morphing Tool
 Able to morph the path shape, color, and stroke lines of uploaded SVGs.  
 
+![Demo1](./public/morphing_sun_nearest-ezgif.com-speed.gif)  
 
 Features:  
 - Supports any number of SVG images  
