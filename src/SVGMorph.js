@@ -4,8 +4,12 @@ import { interpolate } from "flubber";
 import PathUtils from "./PathUtils";
 import MiscUtils from "./MiscUtils";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { toBlobURL } from "@ffmpeg/util";
 import PolygonUtils from "./PolygonUtils";
 import JSZip from "jszip";
+
+const ffmpegCoreBaseURL =
+  "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
 
 function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
   const svgRef = useRef(null);
@@ -34,19 +38,20 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
   const originalCanvasWidth = 512;
   const originalCanvasHeight = 512;
 
-  const localWasmPath = "/ffmpeg-core.wasm";
-  const localCorePath = "/ffmpeg-core.js";
-
   useEffect(() => {
     const loadFFmpeg = async () => {
       if (!ffmpegRef.current) {
         ffmpegRef.current = new FFmpeg();
 
         await ffmpegRef.current.load({
-          coreURL: localCorePath,
-          wasmURL: localWasmPath,
-          memoryInitialSize: 512,
-          memoryMaximumSize: 32768,
+          coreURL: await toBlobURL(
+            `${ffmpegCoreBaseURL}/ffmpeg-core.js`,
+            "text/javascript",
+          ),
+          wasmURL: await toBlobURL(
+            `${ffmpegCoreBaseURL}/ffmpeg-core.wasm`,
+            "application/wasm",
+          ),
         });
       }
     };

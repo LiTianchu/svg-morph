@@ -2,11 +2,11 @@
 
 ## FFmpeg WebAssembly core
 
-This project distributes the following unmodified files from
-`@ffmpeg/core` version 0.12.10:
+This application loads the following unmodified files from jsDelivr at runtime
+from `@ffmpeg/core` version 0.12.10:
 
-- `public/ffmpeg-core.js`
-- `public/ffmpeg-core.wasm`
+- `ffmpeg-core.js`
+- `ffmpeg-core.wasm`
 
 `@ffmpeg/core` contains FFmpeg and external multimedia libraries compiled to
 WebAssembly. The package is distributed under the GNU General Public License,
