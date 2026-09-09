@@ -14,7 +14,7 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
   const [viewBoxSize, setViewBoxSize] = useState({ x: 0, y: 0 });
   const [initialized, setInitialized] = useState(false);
   const [isMorphing, setIsMorphing] = useState(false);
-  const [currentMorphSetting, setCurrentMorphSetting] = useState({
+  const currentMorphSettingRef = useRef({
     duration: 1000,
     quality: 10,
     easing: "linear",
@@ -28,7 +28,7 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
     filename: "morphing",
   });
 
-  const [currentSvgs, setCurrentSvgs] = useState([]);
+  const currentSvgsRef = useRef([]);
   const ffmpegRef = useRef(null);
 
   const originalCanvasWidth = 512;
@@ -43,13 +43,11 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
         ffmpegRef.current = new FFmpeg();
 
         await ffmpegRef.current.load({
-          log: true,
           coreURL: localCorePath,
           wasmURL: localWasmPath,
           memoryInitialSize: 512,
           memoryMaximumSize: 32768,
         });
-        console.log("ffmpeg loaded");
       }
     };
     loadFFmpeg();
@@ -58,28 +56,17 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
   useEffect(() => {
     // if the current morph setting is the same as the previous one, do not reinitialize
     if (
-      morphSetting.oneToMany === currentMorphSetting.oneToMany &&
-      morphSetting.quality === currentMorphSetting.quality &&
-      morphSetting.matching === currentMorphSetting.matching &&
-      currentSvgs === svgs
+      morphSetting.oneToMany === currentMorphSettingRef.current.oneToMany &&
+      morphSetting.quality === currentMorphSettingRef.current.quality &&
+      morphSetting.matching === currentMorphSettingRef.current.matching &&
+      currentSvgsRef.current === svgs
     ) {
-      setCurrentSvgs(svgs);
-      setCurrentMorphSetting(morphSetting);
+      currentSvgsRef.current = svgs;
+      currentMorphSettingRef.current = morphSetting;
       return;
     } else {
-      console.log(morphSetting.oneToMany === currentMorphSetting.oneToMany);
-      console.log(morphSetting.quality === currentMorphSetting.quality);
-      console.log(morphSetting.matching === currentMorphSetting.matching);
-      console.log(currentSvgs === svgs);
-      console.log("reinitializing morph setting");
-      console.log("SVGs length: " + svgs.length);
-      console.log(currentSvgs);
-      console.log(svgs);
-      console.log("Morph settings:");
-      console.log(currentMorphSetting);
-      console.log(morphSetting);
-      setCurrentSvgs(svgs);
-      setCurrentMorphSetting(morphSetting);
+      currentSvgsRef.current = svgs;
+      currentMorphSettingRef.current = morphSetting;
     }
 
     d3.select(svgRef.current).selectAll("*").remove();
@@ -90,19 +77,12 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
       text: "Please upload at least 2 SVGs to start morphing.",
     });
 
-    let timeElapsed = new Date().getTime();
-
     if (!svgs || svgs.length < 2) {
       return;
     }
 
     const computeViewBox = () => {
       onLoadingStateChange(false, false, { text: "Computing viewbox size..." });
-      console.log(
-        "computing viewbox size timestamp: " +
-          (new Date().getTime() - timeElapsed),
-      );
-
       // compute view box size
       let sizeX = 0;
       let sizeY = 0;
@@ -114,7 +94,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
         const viewBox = svgElement.getAttribute("viewBox");
         if (viewBox != null) {
           const svgViewBoxSize = viewBox.split(" ").slice(2);
-          //console.log("viewbox size: " + svgViewBoxSize);
           if (parseFloat(svgViewBoxSize[0]) > sizeX) {
             sizeX = svgViewBoxSize[0];
           }
@@ -137,10 +116,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
 
     const extractPath = () => {
       onLoadingStateChange(false, false, { text: "Extracting paths..." });
-      console.log(
-        "extracting paths timestamp: " + (new Date().getTime() - timeElapsed),
-      );
-
       // extract path to get the list of paths of each svg
       const svgPathLists = svgs.map(PathUtils.extractPaths);
       return svgPathLists;
@@ -151,10 +126,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
       onLoadingStateChange(false, false, {
         text: "Standardizing number of paths...",
       });
-      console.log(
-        "standardizing number of paths timestamp: " +
-          (new Date().getTime() - timeElapsed),
-      );
       const maxPaths = Math.max(
         ...svgPathLists.map((pathList) => pathList.length),
       );
@@ -198,12 +169,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
       onLoadingStateChange(false, false, {
         text: "Generating interpolators for path at index " + pathIndex,
       });
-      console.log(
-        "generating interpolators for path at index " +
-          pathIndex +
-          " timestamp: " +
-          (new Date().getTime() - timeElapsed),
-      );
       let selectedPathIndex = pathIndex;
       const initialPathIndex = pathIndex; // record initial path for looping back to original path
 
@@ -212,8 +177,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
         const path = pathList[selectedPathIndex]; // current path
 
         used[j][selectedPathIndex] = true; // mark the path as used
-        console.log(used);
-
         if (j === svgPathLists.length - 1) {
           // if this is the last svg
           // loop back to the initial path
@@ -224,7 +187,7 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
           do {
             selectedPathIndex = Math.floor(Math.random() * pathNum);
           } while (used[j + 1][selectedPathIndex]); // if this path is marked as used, choose another one
-        } else if (morphSetting.matching != "default") {
+        } else if (morphSetting.matching !== "default") {
           // choose the next pair path based on the matching condition
           const nextSvgPathList = svgPathLists[(j + 1) % svgPathLists.length];
 
@@ -294,7 +257,7 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
                 " path at index " +
                 pathIndex,
             );
-            return;
+            return null;
           }
 
           selectedPathIndex = nextPairPathIndex; // set the next pair path index
@@ -384,11 +347,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
       onLoadingStateChange(false, false, {
         text: "Starting to set up interpolation...",
       });
-      console.log(
-        "setting up interpolation timestamp: " +
-          (new Date().getTime() - timeElapsed),
-      );
-
       const newViewBoxSize = computeViewBox();
       const maxSegmentLength =
         newViewBoxSize.x / (parseInt(morphSetting.quality) * 10);
@@ -398,7 +356,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
       const maxMaskPathsNum = Math.max(
         ...svgPathLists.flat().map((path) => path.maskPaths.length),
       );
-      console.log(svgPathLists);
       const used = Array.from({ length: svgs.length }, () =>
         Array.from({ length: svgPathLists[0].length }, () => false),
       ); // table to mark used paths used[j][i] = true if the i-th path of the j-th svg is used
@@ -466,26 +423,19 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
       onLoadingStateChange(false, false, {
         text: "Finished setting up interpolation, triggering animation...",
       });
-      console.log(
-        "finished setting up interpolation timestamp: " +
-          (new Date().getTime() - timeElapsed),
-      );
-      console.log("intiialized before " + initialized);
       setInitialized(true);
-      console.log("intiialized after " + initialized);
     };
 
     setUpInterpolation();
 
+    const svgElement = svgRef.current;
     return () => {
-      d3.select(svgRef.current).selectAll("*").interrupt();
+      d3.select(svgElement).selectAll("*").interrupt();
     };
-  }, [svgs, morphSetting]);
+  }, [svgs, morphSetting, onLoadingStateChange]);
 
   // animation use effect
   useEffect(() => {
-    console.log("trying to trigger animation, initialized " + initialized);
-
     if (!initialized) {
       setIsMorphing(false);
       onLoadingStateChange(false, false, { text: "" });
@@ -574,7 +524,7 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
           animateMaskPath(maskTagElement, interpolatorsToEnd, 0, k);
         });
     });
-  }, [initialized, morphSetting, svgs]);
+  }, [initialized, morphSetting, svgs, onLoadingStateChange]);
 
   useEffect(() => {
     setCurrentExportSetting(exportSetting);
@@ -585,7 +535,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
     const numOfMorphs = pathsRef.current[0].interpolatorsToEnd.length;
     const numOfMaskPathsPerNormalPath =
       pathsRef.current[0].interpolatorsToEnd[0].maskPathInterpolators.length;
-    console.log("num of morphs: " + numOfMorphs);
     // get the easing function from the morph setting
     const d3Easing = MiscUtils.getD3Easing(morphSetting.easing);
     const downloadQueue = [];
@@ -658,8 +607,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
     const zip = new JSZip();
 
     const downloadQueue = getFrameQueue(currentExportSetting.framerate);
-    let processedCount = 0;
-
     // process all frames and add to zip
     for (const { img, m, frameIndex } of downloadQueue) {
       // ensure image is loaded before drawing
@@ -689,11 +636,7 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
 
       const fileName = `image-morph${m}-frame${frameIndex}.png`;
       zip.file(fileName, pngBlob);
-      console.log(`Added ${fileName} to zip`);
-
-      processedCount++;
     }
-    console.log("zipping frames...");
     const zipBlob = await zip.generateAsync({ type: "blob" });
     const zipUrl = URL.createObjectURL(zipBlob);
 
@@ -703,7 +646,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    console.log("downloaded zip file");
     // clean up
     URL.revokeObjectURL(zipUrl);
   };
@@ -738,9 +680,8 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
     console.log(
       `Resolution: ${canvasRef.current.width}x${canvasRef.current.height}`,
     );
-    console.log(`FPS: ${fps}, Frames per morph: ${totalFrames}`);
+    console.log(`FPS: ${fps}, frames per morph: ${totalFrames}`);
     console.log(`Total frames: ${totalFrames * numOfMorphs}`);
-
     // generate the sequence of frames
     const frameQueue = getFrameQueue(totalFrames);
     const canvas = canvasRef.current;
@@ -752,8 +693,7 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
       10,
       Math.min(30, Math.floor(2000000 / (canvas.width * canvas.height))),
     );
-    console.log(`Using batch size of ${BATCH_SIZE} frames per batch`);
-
+    console.log(`Using batches of ${BATCH_SIZE} frames`);
     // array to store temporary video segment filenames
     const tempSegmentFiles = [];
 
@@ -781,9 +721,7 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
           await processBatchFrames(currentBatch, context, m);
 
           const segmentFile = `temp_morph${m}_segment${batchIdx}.mp4`;
-          console.log(
-            `creating video segment for morph ${m}, batch ${batchIdx}`,
-          );
+          console.log(`Encoding morph ${m}, batch ${batchIdx}`);
           await ffmpegRef.current.exec([
             "-framerate",
             `${fps}`,
@@ -805,14 +743,12 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
           ]);
 
           segmentFiles.push(segmentFile);
-          console.log(`created video segment: ${segmentFile}`);
 
           // clean up the frame files to free memory
           for (const { frameIndex } of currentBatch) {
             const fileName = `morph${m}_frame${String(frameIndex).padStart(9, "0")}.png`;
             try {
               await ffmpegRef.current.deleteFile(fileName);
-              console.log(`deleted temporary frame: ${fileName}`);
             } catch (e) {
               console.error("Failed to delete frame:", fileName, e);
             }
@@ -824,13 +760,11 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
         const concatContent = segmentFiles
           .map((file) => `file '${file}'`)
           .join("\n");
-        console.log(concatContent);
         const concatFileName = `concat_morph${m}.txt`;
         await ffmpegRef.current.writeFile(concatFileName, concatContent);
 
         // concatenate temp segments to final output for this morph
         const outputFile = `${currentExportSetting.filename}_${m}.mp4`;
-        console.log(`creating concat video file for morph ${m}`);
         await ffmpegRef.current.exec([
           "-f",
           "concat",
@@ -856,18 +790,12 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        console.log(`downloaded concat video file for morph ${m}`);
-
         // clean up this morph's temp files
         for (const file of segmentFiles) {
-          console.log("trying to delete temporary segment:", file);
           await ffmpegRef.current.deleteFile(file);
-          console.log(`deleted temporary segment: ${file}`);
         }
         await ffmpegRef.current.deleteFile(concatFileName);
-        console.log(`deleted concat file: ${concatFileName}`);
         await ffmpegRef.current.deleteFile(outputFile);
-        console.log(`deleted output file: ${outputFile}`);
       }
     } else {
       for (let m = 0; m < numOfMorphs; m++) {
@@ -893,9 +821,7 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
           // create video clip segment for this batch
           const segmentFile = `temp_segment${segmentIdx}.mp4`;
 
-          console.log(
-            `creating video segment for morph ${m}, batch ${batchIdx}`,
-          );
+          console.log(`Encoding morph ${m}, batch ${batchIdx}`);
           await ffmpegRef.current.exec([
             "-framerate",
             `${fps}`,
@@ -919,14 +845,12 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
           ]);
 
           tempSegmentFiles.push(segmentFile);
-          console.log(`created video segment: ${segmentFile}`);
 
           // clean up frame files to free memory
           for (const { frameIndex } of currentBatch) {
             const fileName = `frame${String(frameIndex + totalFrames * m).padStart(9, "0")}.png`;
             try {
               await ffmpegRef.current.deleteFile(fileName);
-              console.log(`deleted temporary frame: ${fileName}`);
             } catch (e) {
               console.error("Failed to delete frame:", fileName);
             }
@@ -941,7 +865,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
         .map((file) => `file '${file}'`)
         .join("\n");
       await ffmpegRef.current.writeFile("concat.txt", concatContent);
-      console.log("creating concat video file");
       // concatenate temp video clips to final output
       const outputFile = `${currentExportSetting.filename}.mp4`;
       await ffmpegRef.current.exec([
@@ -970,7 +893,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      console.log("downloaded video file");
     }
 
     // delete all temporary files
@@ -984,7 +906,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
             file.name.endsWith(".txt"))
         ) {
           await ffmpegRef.current.deleteFile(file.name);
-          console.log(`deleted temporary file: ${file.name}`);
         }
       }
     } catch (e) {
@@ -999,7 +920,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
     morphIdx,
     totalFrames = null,
   ) => {
-    console.log(batch);
     for (const { img, frameIndex } of batch) {
       // ensure image is loaded
       if (!img.complete) {
@@ -1022,7 +942,6 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
       }
 
       await ffmpegRef.current.writeFile(fileName, data);
-      console.log(`wrote ${fileName} to ffmpeg VFS`);
       URL.revokeObjectURL(dataUrl);
     }
   };

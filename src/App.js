@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import "./App.css";
 import SVGMorph from "./SVGMorph";
 import SVGList from "./SVGList";
@@ -22,39 +22,38 @@ function App() {
     filename: "morphing",
   });
 
-  const [loadingInfoList, setLoadingInfoList] = useState([
+  const [, setLoadingInfoList] = useState([
     {
       text: "Please upload at least 2 SVGs to start morphing.",
     },
   ]);
 
-  const [isMorphing, setIsMorphing] = useState(false);
+  const [, setIsMorphing] = useState(false);
 
-  const handleLoadingStateChange = (
-    isStartingNewMorph,
-    isMorphing,
-    loadingInfo,
-  ) => {
-    setIsMorphing(isMorphing);
+  const handleLoadingStateChange = useCallback(
+    (isStartingNewMorph, isMorphing, loadingInfo) => {
+      setIsMorphing(isMorphing);
 
-    setLoadingInfoList((prevLoadingInfo) => {
-      // if loadingInfo.text is empty, do not add to loadingInfoList
-      let newLoadingInfo = [...prevLoadingInfo];
-      if (loadingInfo.text !== "") {
-        newLoadingInfo.push(loadingInfo);
-      }
+      setLoadingInfoList((prevLoadingInfo) => {
+        // if loadingInfo.text is empty, do not add to loadingInfoList
+        let newLoadingInfo = [...prevLoadingInfo];
+        if (loadingInfo.text !== "") {
+          newLoadingInfo.push(loadingInfo);
+        }
 
-      if (isStartingNewMorph) {
-        return [
-          {
-            text: "Please upload at least 2 SVGs to start morphing.",
-          },
-        ];
-      } else {
-        return newLoadingInfo.slice(-10); //only keep top 10 latest message
-      }
-    });
-  };
+        if (isStartingNewMorph) {
+          return [
+            {
+              text: "Please upload at least 2 SVGs to start morphing.",
+            },
+          ];
+        } else {
+          return newLoadingInfo.slice(-10); //only keep top 10 latest message
+        }
+      });
+    },
+    [],
+  );
 
   return (
     <div className="App">

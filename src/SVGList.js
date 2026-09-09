@@ -12,8 +12,6 @@ function SVGList({ onSvgsChange }) {
       return newSvgs;
     });
 
-    console.log("svgs length: " + svgs.length);
-    console.log("index: " + index);
     if (svgs.length === index) {
       // if the last svg is uploaded, add a new uploader
       addUploader();
@@ -39,7 +37,6 @@ function SVGList({ onSvgsChange }) {
 
   useEffect(() => {
     // disable remove button if the upload box is not uploaded with anything
-    console.log("current svgs: " + svgs);
     uploaders.forEach((uploader, index) => {
       const btn = document.getElementById(uploader.id + "_remove_btn");
       if (btn !== null) {

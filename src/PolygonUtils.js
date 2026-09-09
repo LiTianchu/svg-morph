@@ -105,7 +105,7 @@ const getEuclideanDistance = (point1, point2) => {
   return Math.sqrt(vector.x ** 2 + vector.y ** 2);
 };
 
-export default {
+const PolygonUtils = {
   getWindingOrder,
   getCentroid,
   pointArrToVector,
@@ -115,3 +115,5 @@ export default {
   getVector,
   getEuclideanDistance,
 };
+
+export default PolygonUtils;

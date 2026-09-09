@@ -59,7 +59,7 @@ function MorphSettingPanel({ onSettingChange }) {
 
   const handleQualitySettingChange = (newQuality) => {
     const qualityInt = parseInt(newQuality);
-    if (qualityInt != quality) {
+    if (qualityInt !== quality) {
       setQuality(qualityInt);
       onSettingChange({
         duration: duration,

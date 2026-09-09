@@ -67,4 +67,6 @@ const getD3Easing = (easingName) => {
   }
 };
 
-export default { getD3Easing };
+const MiscUtils = { getD3Easing };
+
+export default MiscUtils;

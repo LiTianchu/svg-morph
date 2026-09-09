@@ -228,7 +228,6 @@ const getColorFromSvgElement = (pathElement) => {
         }
 
         if (key === "fill") {
-          console.log("fill color: " + value);
           fillColor = value;
         }
       });
@@ -366,7 +365,7 @@ const extractPaths = (svgString) => {
           convertedPathString = PathConverter.polygonToPath(pathElement);
           break;
         default:
-          console.log("unsupported path element tag: " + pathElement.tagName);
+          break;
       }
       pathElement = rawPathStringToPathElement(convertedPathString);
     }
@@ -386,10 +385,8 @@ const extractPaths = (svgString) => {
       // handle mask paths that are not path elements
       maskPathElements.forEach((maskPathElement, i) => {
         const maskColor = getColorFromSvgElement(maskPathElement);
-        console.log("mask color: " + maskColor);
         if (maskColor == null || maskColor === "white") {
           // skip white mask paths (bg) or paths with no fill
-          console.log("skipping mask path with color: " + maskColor);
           return;
         }
 
@@ -418,9 +415,7 @@ const extractPaths = (svgString) => {
                 PathConverter.polygonToPath(maskPathElement);
               break;
             default:
-              console.log(
-                "unsupported mask path element tag: " + maskPathElement.tagName,
-              );
+              break;
           }
           maskPathElement = rawPathStringToPathElement(convertedPathString);
         }
@@ -443,14 +438,12 @@ const extractPaths = (svgString) => {
 
       // check if the path contains holes as subpaths
       const fillRule = pathElement.getAttribute("fill-rule");
-      let outerContour = null;
       let outerContourPoints = null;
       let subPathData = [];
       subPaths.forEach((subPath, i) => {
-        console.log("getting path points from sub path: " + subPath);
         let pathPoints = getPathPoints(subPath);
         let selectedPoint = pathPoints[0];
-        if (selectedPoint == null || selectedPoint == undefined) {
+        if (selectedPoint === null || selectedPoint === undefined) {
           const commandIndex = getNextElementEndIndex(subPath, 0); // M
           const xCoordEndIndex = getNextElementEndIndex(subPath, commandIndex);
           const yCoordEndIndex = getNextElementEndIndex(
@@ -477,7 +470,7 @@ const extractPaths = (svgString) => {
         }
 
         const filteredPathData = subPathData.filter(
-          (p) => p.subPath != subPath,
+          (p) => p.subPath !== subPath,
         );
 
         const numOfIntersections = PolygonUtils.countPointPolygonIntersection(
@@ -486,7 +479,6 @@ const extractPaths = (svgString) => {
         );
         if (numOfIntersections % 2 === 0) {
           // if the point is outside an even number of polygon line segments, it is the outer contour
-          outerContour = subPath;
           outerContourPoints = subPathData[i].points;
           return;
         }
@@ -495,7 +487,7 @@ const extractPaths = (svgString) => {
       subPaths.forEach((subPath, i) => {
         // if the subpath is a hole, add it to the mask paths
         const filteredPathData = subPathData.filter(
-          (p) => p.subPath != subPath,
+          (p) => p.subPath !== subPath,
         );
         if (
           isPathHole(
@@ -513,9 +505,8 @@ const extractPaths = (svgString) => {
       let maskPathPoints = [];
       currentPathMasks.forEach((maskPath, i) => {
         const maskPathData = subPathData.find((p) => p.subPath === maskPath);
-        if (maskPathData == null || maskPathData == undefined) {
+        if (maskPathData === null || maskPathData === undefined) {
           // handle cases where the mask if pre-defined
-          console.log("getting mask path points from pre-defined mask path");
           maskPathPoints.push(getPathPoints(maskPath));
         } else {
           maskPathPoints.push(maskPathData.points);
@@ -528,7 +519,6 @@ const extractPaths = (svgString) => {
           const mainPathPoints = subPathData.find(
             (p) => p.subPath === subPath,
           ).points;
-          console.log(strokeData);
           extractedPaths.push({
             mainPath: subPath,
             mainPathPoints: mainPathPoints,
@@ -545,7 +535,7 @@ const extractPaths = (svgString) => {
   return extractedPaths;
 };
 
-export default {
+const PathUtils = {
   getWidthHeight,
   getBBox,
   getPathPoints,
@@ -557,3 +547,5 @@ export default {
   rawPathStringToPathElement,
   extractPaths,
 };
+
+export default PathUtils;

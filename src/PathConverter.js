@@ -66,7 +66,7 @@ const polygonToPath = (polygon) => {
   return pathData + " Z";
 };
 
-export default {
+const PathConverter = {
   rectToPath,
   circleToPath,
   ellipseToPath,
@@ -74,3 +74,5 @@ export default {
   polylineToPath,
   polygonToPath,
 };
+
+export default PathConverter;
