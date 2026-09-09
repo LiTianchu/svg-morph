@@ -1020,8 +1020,9 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
                   ? handleFrameExport
                   : handleVideoExport
               }
+              title="Start Export! (Loading screen not done yet, inspect console log for the export progress)"
             >
-              Export
+              Export!
             </button>
           </div>
         </div>
