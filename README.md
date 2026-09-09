@@ -1,7 +1,6 @@
 # A Simple SVG Morphing Tool
-
-Website URL: <https://svgmorph.rain001.com>
 Able to morph the path shape, color, and stroke lines of uploaded SVGs.  
+Website URL: <https://svgmorph.rain001.com>  
 
 <img src="./public/morphing_sun_nearest-ezgif.com-speed.gif" alt="Demo Sun Morphing" width=500 />  
 
