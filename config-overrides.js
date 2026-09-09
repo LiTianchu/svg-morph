@@ -1,4 +1,4 @@
-// need to add override to ignore
+// need to add override to ignore the warning from ffmpeg to pass the CI
 module.exports = function override(config) {
   config.ignoreWarnings = [
     ...(config.ignoreWarnings || []),
