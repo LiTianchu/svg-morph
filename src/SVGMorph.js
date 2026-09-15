@@ -21,12 +21,12 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
   const currentMorphSettingRef = useRef({
     duration: 1000,
     quality: 10,
-    easing: "linear",
+    easing: "exp-in-out",
     oneToMany: "duplicate",
     matching: "default",
   });
   const [currentExportSetting, setCurrentExportSetting] = useState({
-    framerate: 24,
+    framerate: 30,
     resolution: 1024,
     fileFormat: "MP4",
     filename: "morphing",
@@ -87,7 +87,9 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
     }
 
     const computeViewBox = () => {
-      onLoadingStateChange(false, false, { text: "Computing viewbox size..." });
+      onLoadingStateChange(false, false, {
+        text: "Computing viewbox size...",
+      });
       // compute view box size
       let sizeX = 0;
       let sizeY = 0;
@@ -785,7 +787,9 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
         ]);
 
         const videoData = await ffmpegRef.current.readFile(outputFile);
-        const videoBlob = new Blob([videoData.buffer], { type: "video/mp4" });
+        const videoBlob = new Blob([videoData.buffer], {
+          type: "video/mp4",
+        });
         const url = URL.createObjectURL(videoBlob);
 
         const link = document.createElement("a");
@@ -888,7 +892,9 @@ function SVGMorph({ svgs, morphSetting, exportSetting, onLoadingStateChange }) {
 
       // download the final output
       const videoData = await ffmpegRef.current.readFile(outputFile);
-      const videoBlob = new Blob([videoData.buffer], { type: "video/mp4" });
+      const videoBlob = new Blob([videoData.buffer], {
+        type: "video/mp4",
+      });
       const url = URL.createObjectURL(videoBlob);
 
       const link = document.createElement("a");

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 function MorphSettingPanel({ onSettingChange }) {
   const [duration, setDuration] = useState(1000);
-  const [easing, setEasing] = useState("linear");
+  const [easing, setEasing] = useState("exp-in-out");
   const [oneToMany, setOneToMany] = useState("duplicate");
   const [quality, setQuality] = useState(10);
   const [matching, setMatching] = useState("default");

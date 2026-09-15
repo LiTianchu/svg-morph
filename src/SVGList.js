@@ -1,9 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SVGUploader from "./SVGUploader";
 
-function SVGList({ onSvgsChange }) {
+function SVGList({ initialSvgs, onSvgsChange }) {
   const [svgs, setSvgs] = useState([]);
   const [uploaders, setUploaders] = useState([{ id: Date.now() }]);
+  const hasLoadedInitialSvgs = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedInitialSvgs.current || initialSvgs.length === 0) {
+      return;
+    }
+
+    hasLoadedInitialSvgs.current = true;
+    setSvgs(initialSvgs);
+    setUploaders([
+      ...initialSvgs.map((_, index) => ({ id: `default-${index}` })),
+      { id: `empty-${Date.now()}` },
+    ]);
+  }, [initialSvgs]);
 
   const handleSvgUploaded = (svg, index) => {
     setSvgs((prevSvgs) => {
@@ -78,6 +92,7 @@ function SVGList({ onSvgsChange }) {
             }}
           >
             <SVGUploader
+              initialSvg={svgs[index]}
               onSvgUploaded={(svg) => handleSvgUploaded(svg, index)}
               index={index}
             />

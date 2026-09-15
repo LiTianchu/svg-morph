@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-function SVGUploader({ onSvgUploaded, index }) {
+function SVGUploader({ initialSvg, onSvgUploaded, index }) {
   const [svgContent, setSvgContent] = useState(null);
   const fileInputRef = useRef(null);
   const svgContainerRef = useRef(null);
@@ -36,8 +36,7 @@ function SVGUploader({ onSvgUploaded, index }) {
     }
   };
 
-  const uploadSVG = (svgString) => {
-    // display the uploaded SVG in the container
+  const displaySVG = (svgString) => {
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgString, "image/svg+xml");
     const svgElement = svgDoc.documentElement;
@@ -49,10 +48,18 @@ function SVGUploader({ onSvgUploaded, index }) {
     svgElement.style.fill = "black";
 
     setSvgContent(svgElement.outerHTML);
+  };
 
-    // callback to send the svg string data to the parent component
+  const uploadSVG = (svgString) => {
+    displaySVG(svgString);
     onSvgUploaded(svgString);
   };
+
+  useEffect(() => {
+    if (initialSvg) {
+      displaySVG(initialSvg);
+    }
+  }, [initialSvg]);
 
   return (
     <div

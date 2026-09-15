@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 function ExportSettingPanel({ onExportSettingChange }) {
-  const [framerate, setFramerate] = useState(24);
+  const [framerate, setFramerate] = useState(30);
   const [resolution, setResolution] = useState(1024);
   const [fileFormat, setFileFormat] = useState("MP4");
   const [filename, setFilename] = useState("morphing");
@@ -78,7 +78,11 @@ function ExportSettingPanel({ onExportSettingChange }) {
           onChange={(e) => handleFramerateSettingChange(e.target.value)}
         ></input>
         <span
-          style={{ marginLeft: "10px", fontSize: "0.45em", color: "black" }}
+          style={{
+            marginLeft: "10px",
+            fontSize: "0.45em",
+            color: "black",
+          }}
         >
           {framerate}fps
         </span>
@@ -105,7 +109,11 @@ function ExportSettingPanel({ onExportSettingChange }) {
           onChange={(e) => handleResolutionSettingChange(e.target.value)}
         ></input>
         <span
-          style={{ marginLeft: "10px", fontSize: "0.45em", color: "black" }}
+          style={{
+            marginLeft: "10px",
+            fontSize: "0.45em",
+            color: "black",
+          }}
         >
           {resolution} X {resolution}
         </span>
